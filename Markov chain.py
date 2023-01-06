@@ -42,30 +42,53 @@ class Agent:
                     prob_of_individual_states.append(state_picked)
                 frequency = dict(collections.Counter(prob_of_individual_states))        # find the number of occurences of each state
                 total = sum(frequency.values(), 0.0)
-                frequency = {k: round(v / total, 1) for k, v in frequency.items()}
+                #frequency = {k: round(v / total, 1) for k, v in frequency.items()}
+                frequency = {k: v / total for k, v in frequency.items()}
 
                 debug("The probability of transtions from state {} to other states are {}".format(state, list(frequency.values())))
                 debug(frequency)
                 debug(list(frequency.values()))
                 
                 stateTransitionMetric.append(list(frequency.values()))
-            print(stateTransitionMetric)    
-        self.state_transition(No_states = len(states), initial_state = Initial_state_, STM = stateTransitionMetric )
+            debug(stateTransitionMetric)
+
+        no_transitions = int(input("Please enter number of transitions the Agent should take"))    
+        return (self.state_transition(initial_state = Initial_state_, STM = stateTransitionMetric, no_transitions = no_transitions))
 
     def random(self, No_states):
-        return random.randint(1, self.numstates_)
+        return random.randint(1, No_states)
     
     def animation(self):
         pass
+    
+    def sub_func_state_transition_probability(self, STM, current_state):
+        return STM[current_state-1]
 
-    def state_transition(self, No_states, initial_state, STM):
-        probability_array = []
-        initial_Prob_Array = STM[initial_state-1]
-        debug("The probability of reaching other states from the given initial states {}".format(initial_Prob_Array))
-        for i,v in enumerate(initial_Prob_Array):     
-            probability_array.extend([i+1]*int(v*100))
-        pass
+    def probability_array(self, ind_prob):
+        probability_Array = []
+        for i,v in enumerate(ind_prob):     
+            probability_Array.extend([i+1]*int(v*100))
+        return probability_Array
 
+    def state_transition(self, initial_state, STM, no_transitions):
+
+        Current_Agent_state = initial_state
+        ind_prob = self.sub_func_state_transition_probability(STM, initial_state)
+        debug("Individual probability from State Transition Function is {}".format(ind_prob))
+        probabilityArray = self.probability_array(ind_prob)
+        debug("The probability of reaching other states from the given initial states {}\n and length of the array is: {}".format(probabilityArray, len(probabilityArray)))
+        #for transition in range(no_transitions):
+        if no_transitions == 0:
+            return Current_Agent_state
+        else:
+            idx = self.random(100)
+            debug("Random Index is: {}".format(idx))
+            try:
+                Current_Agent_state = probabilityArray[idx]
+            except:
+                Current_Agent_state = probabilityArray[len(probabilityArray)-1]
+            no_transitions -= 1
+            return (self.state_transition(initial_state = Current_Agent_state, STM = STM, no_transitions = no_transitions))
 
 No_states = int(input("Enter the number of states"))
 iterations = int(input("Enter the number of iterations"))
